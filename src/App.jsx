@@ -3,6 +3,7 @@ import './App.css'
 import { useState } from 'react';
 import supabase from "./config/supabaseClient"
 
+
 function App() {
   const [showThemeMenu, setShowThemeMenu] = useState(false);
   const [showAssignmentMenu, setShowAssignmentMenu] = useState(false);
@@ -44,7 +45,6 @@ function App() {
     { id: 4, userId: 4, text: "Set up database schema" }
   ]
 
-  //Selection of themes
   function setTheme(theme) {
     const root = document.documentElement;
     if (theme === "dark") {
@@ -65,6 +65,7 @@ function App() {
       root.style.setProperty("--text-color", "#3a1f04");
     }
   }
+
 
   return (
     <>
