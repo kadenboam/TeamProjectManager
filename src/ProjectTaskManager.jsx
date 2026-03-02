@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import supabase from './config/supabaseClient'
 import './PTM.css'
+import { themes } from './theme'
 
 function ProjectTaskManager() {
   // ─── STATE FOR THE THREE DATASETS ─────────────────────────────────────────────
@@ -27,26 +28,17 @@ function ProjectTaskManager() {
   // IDK
 
   const [showThemeMenu, setShowThemeMenu] = useState(false);
-  function setTheme(theme) {
+  function setTheme(themeName) {
     const root = document.documentElement;
-    if (theme === "dark") {
-      root.style.setProperty("--bg-color", "#1a1a1a");
-      root.style.setProperty("--box-color", "#333333");
-      root.style.setProperty("--text-color", "#f0f0f0");
-    }
+    const theme = themes[themeName];
 
-    if (theme === "ocean") {
-      root.style.setProperty("--bg-color", "#003f5c");
-      root.style.setProperty("--box-color", "#2f4b7c");
-      root.style.setProperty("--text-color", "#ffffff");
-    }
+    if (!theme) return;
 
-    if (theme === "sunset") {
-      root.style.setProperty("--bg-color", "#ff9e80");
-      root.style.setProperty("--box-color", "#ff6e40");
-      root.style.setProperty("--text-color", "#3a1f04");
-    }
-  }
+    Object.entries(theme).forEach(([key, value]) => {
+    root.style.setProperty(key, value);
+  });
+}
+
 
   // ═══════════════════════════════════════════════════════════════════════════════
   // DATASET 1: LOAD ALL PROJECTS (runs once when component loads)
@@ -193,6 +185,7 @@ function ProjectTaskManager() {
 
   return (
     <div style={{ padding: '20px' }}>
+      <Link to="/projects">Old Things</Link>
       <h1>Project Task Manager</h1>
 
       {/* ─── PROJECT SELECTOR ─────────────────────────────────────────────── */}
@@ -319,6 +312,11 @@ function ProjectTaskManager() {
         <button onClick={() => setTheme("dark")}>Dark</button>
         <button onClick={() => setTheme("ocean")}>Ocean</button>
         <button onClick={() => setTheme("sunset")}>Sunset</button>
+        <button onClick={() => setTheme("forest")}>Forest</button>
+        <button onClick={() => setTheme("lavender")}>Lavender</button>
+        <button onClick={() => setTheme("cyberpunk")}>Cyberpunk</button>
+        <button onClick={() => setTheme("sand")}>Sand</button>
+        <button onClick={() => setTheme("midnight")}>Midnight</button>
       </div>
     </div>
   )

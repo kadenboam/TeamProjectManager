@@ -70,7 +70,7 @@ function App() {
   return (
     <>
       <Link to="/page2">Go to Page 2</Link>
-      <Link to="/projects">Go to other page</Link>
+      <Link to="/">Go to other page</Link>
       <div>
         <h1>Team Project Helper</h1>
       </div>
