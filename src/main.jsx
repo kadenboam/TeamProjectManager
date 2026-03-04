@@ -6,7 +6,7 @@ import ProjectTaskManager from './ProjectTaskManager.jsx'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <BrowserRouter>
+  <BrowserRouter basename="/TeamProjectManager">
     <Routes>
       <Route path="/projects" element={<App />} />
       <Route path="/page2" element={<Page2 />} />
