@@ -37,6 +37,26 @@ function ProjectTaskManager() {
     Object.entries(theme).forEach(([key, value]) => {
     root.style.setProperty(key, value);
   });
+
+  async function toggleTask(taskId, currentValue) {
+    // 1. Update Supabase
+    const { error } = await supabase
+      .from('Tasks')
+      .update({ complete: !currentValue })
+      .eq('task_id', taskId);
+
+    if (error) {
+      console.error("Error updating task:", error);
+      return;
+    }
+
+    // 2. Update local state
+    setUserTasks(prev =>
+      prev.map(t =>
+        t.task_id === taskId ? { ...t, complete: !currentValue } : t
+      )
+    );
+  }
 }
 
 
@@ -277,10 +297,10 @@ function ProjectTaskManager() {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={task.complete}
-                        readOnly
+                        onChange={() => toggleTask(task.task_id, task.complete)}
                       />
                       <span style={{ 
                         textDecoration: task.complete ? 'line-through' : 'none',
