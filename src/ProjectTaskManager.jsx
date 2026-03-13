@@ -353,7 +353,7 @@ function ProjectTaskManager() {
         <button onClick={() => setTheme("sand")}>Sand</button>
         <button onClick={() => setTheme("midnight")}>Midnight</button>
       </div>
-      {/* Notification html stuff */}
+      {/* Notification html Addition */}
       {lateSprintWarnings.length > 0 && (
         <div className="late-warning-box">
           <h4>⚠ Past Sprint Tasks</h4>
