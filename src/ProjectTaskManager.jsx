@@ -39,43 +39,65 @@ function ProjectTaskManager() {
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [loadingTasks, setLoadingTasks] = useState(false)
 
-  // ─── STATE FOR Notification ───────────────────────────────────────────────────
-  const [lateSprintWarnings, setLateSprintWarnings] = useState([]);
+  // ─── STATE FOR NOTIFICATION ───────────────────────────────────────────────────
+  
+  const [lateSprintWarnings, setLateSprintWarnings] = useState([])
 
-  // ─── Function and States for Themes ─────────────────────────────────────────── 
+  // ─── STATE FOR THEMES ─────────────────────────────────────────────────────────
 
-  const [showThemeMenu, setShowThemeMenu] = useState(false);
+  const [showThemeMenu, setShowThemeMenu] = useState(false)
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // HELPER FUNCTIONS
+  // ═══════════════════════════════════════════════════════════════════════════════
+
   function setTheme(themeName) {
-    const root = document.documentElement;
-    const theme = themes[themeName];
+    const root = document.documentElement
+    const theme = themes[themeName]
 
-    if (!theme) return;
+    if (!theme) return
 
     Object.entries(theme).forEach(([key, value]) => {
-    root.style.setProperty(key, value);
-  });
-
-  async function toggleTask(taskId, currentValue) {
-    // 1. Update Supabase
-    const { error } = await supabase
-      .from('Tasks')
-      .update({ complete: !currentValue })
-      .eq('task_id', taskId);
-
-    if (error) {
-      console.error("Error updating task:", error);
-      return;
-    }
-
-    // 2. Update local state
-    setUserTasks(prev =>
-      prev.map(t =>
-        t.task_id === taskId ? { ...t, complete: !currentValue } : t
-      )
-    );
+      root.style.setProperty(key, value)
+    })
   }
-}
 
+  async function handleToggleComplete(taskId, currentStatus) {
+    const success = await updateTaskStatus(taskId, !currentStatus)
+    
+    if (success) {
+      // Optimistic update - update UI immediately
+      setUserTasks(prev =>
+        prev.map(task =>
+          task.task_id === taskId 
+            ? { ...task, complete: !currentStatus }
+            : task
+        )
+      )
+      
+      // Recalculate late warnings
+      calculateLateWarnings(userTasks.map(task =>
+        task.task_id === taskId 
+          ? { ...task, complete: !currentStatus }
+          : task
+      ))
+    } else {
+      // TODO: Add alert for user
+      console.error('Failed to update task status')
+    }
+  }
+
+  function calculateLateWarnings(tasks) {
+    // Get current sprint (you can make this dynamic later)
+    const currentSprint = 2
+
+    // Filter tasks where sprint_num is past and not complete
+    const late = tasks
+      .filter(t => !t.complete && t.sprint_num < currentSprint)
+      .sort((a, b) => b.points - a.points) // Order by points desc
+
+    setLateSprintWarnings(late)
+  }
 
   // ═══════════════════════════════════════════════════════════════════════════════
   // DATASET 1: LOAD ALL PROJECTS (runs once when component loads)
@@ -83,7 +105,7 @@ function ProjectTaskManager() {
 
   useEffect(() => {
     loadProjects()
-  }, [])  // Empty array = run once on mount
+  }, [])
 
   async function loadProjects() {
     setLoadingProjects(true)
@@ -114,7 +136,7 @@ function ProjectTaskManager() {
       setUsersInProject([])
       setSelectedUserId(null)
     }
-  }, [selectedProjectId])  // Run when selectedProjectId changes
+  }, [selectedProjectId])
 
   async function loadUsersInProject(projectId) {
     setLoadingUsers(true)
@@ -122,7 +144,7 @@ function ProjectTaskManager() {
     // Step 1: Get user IDs from Project_users table
     const { data: projectUsers, error: error1 } = await supabase
       .from('Project_users')
-      .select('*')
+      .select('user_id')
       .eq('project_id', projectId)
 
     if (error1) {
@@ -144,7 +166,7 @@ function ProjectTaskManager() {
     // Step 2: Get full user details
     const { data: users, error: error2 } = await supabase
       .from('Users')
-      .select('*')
+      .select('user_id, username, alias')
       .in('user_id', userIds)
       .order('alias')
 
@@ -167,8 +189,9 @@ function ProjectTaskManager() {
       loadUserTasks(selectedUserId, selectedProjectId)
     } else {
       setUserTasks([])
+      setLateSprintWarnings([])
     }
-  }, [selectedUserId, selectedProjectId])  // Run when either changes
+  }, [selectedUserId, selectedProjectId])
 
   async function loadUserTasks(userId, projectId) {
     setLoadingTasks(true)
@@ -176,7 +199,7 @@ function ProjectTaskManager() {
     // Step 1: Get task IDs for this user
     const { data: userTaskData, error: error1 } = await supabase
       .from('User_tasks')
-      .select('*')
+      .select('task_id')
       .eq('user_id', userId)
 
     if (error1) {
@@ -187,6 +210,7 @@ function ProjectTaskManager() {
 
     if (!userTaskData || userTaskData.length === 0) {
       setUserTasks([])
+      setLateSprintWarnings([])
       setLoadingTasks(false)
       return
     }
@@ -206,18 +230,7 @@ function ProjectTaskManager() {
       console.error('Error loading tasks:', error2)
     } else {
       setUserTasks(tasks)
-      // --- Notification thing ---
-      // Assume project has a field "current_sprint"
-      const project = projects.find(p => p.project_id === projectId);
-      const currentSprint = 2;
-
-      // Filter tasks where sprint_num is past
-      const late = tasks
-        .filter(t => !t.complete && t.sprint_num < currentSprint)
-        .sort((a, b) => b.points - a.points); // order by points desc
-
-      setLateSprintWarnings(late);
-      // -- Notification thing end ---
+      calculateLateWarnings(tasks)
       console.log('Loaded tasks for user', userId, 'in project', projectId, ':', tasks)
     }
 
@@ -240,14 +253,14 @@ function ProjectTaskManager() {
       {/* ─── PROJECT SELECTOR ─────────────────────────────────────────────── */}
       <div className="head_box">
         <div style={{ marginBottom: '20px' }}>
-          <label> {/* Edit UI */}
+          <label>
             <strong>Select Project: </strong>
             <select 
               value={selectedProjectId || ''} 
               onChange={(e) => {
                 const projectId = e.target.value ? Number(e.target.value) : null
                 setSelectedProjectId(projectId)
-                setSelectedUserId(null)  // Reset user selection
+                setSelectedUserId(null)
               }}
             >
               <option value="">-- Choose a project --</option>
@@ -259,13 +272,12 @@ function ProjectTaskManager() {
             </select>
           </label>
           
-          <div style={{ marginTop: '10px'}}>
+          <div style={{ marginTop: '10px' }}>
             Total projects: {projects.length}
           </div>
         </div>
 
         {/* ─── USER SELECTOR ────────────────────────────────────────────────── */}
-        {/* Edit UI */}
         {selectedProjectId && (
           <div style={{ marginBottom: '20px', paddingLeft: '20px' }}>
             <label>
@@ -290,15 +302,28 @@ function ProjectTaskManager() {
               )}
             </label>
             
-            <div style={{ marginTop: '10px'}}>
+            <div style={{ marginTop: '10px' }}>
               Users in this project: {usersInProject.length}
             </div>
           </div>
-          )}
+        )}
       </div>
 
+      {/* ─── LATE SPRINT WARNINGS ─────────────────────────────────────────── */}
+      {lateSprintWarnings.length > 0 && (
+        <div className="late-warning-box">
+          <h4>⚠ Past Sprint Tasks</h4>
+          <ul>
+            {lateSprintWarnings.map(t => (
+              <li key={t.task_id}>
+                <strong>{t.points} pts</strong> — {t.description} (Sprint {t.sprint_num})
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* ─── TASKS DISPLAY ────────────────────────────────────────────────── */}
-      {/* Edit UI */}
       {selectedUserId && selectedProjectId && (
         <div style={{ marginTop: '20px', paddingLeft: '40px' }}>
           <h3>Tasks</h3>
@@ -309,7 +334,7 @@ function ProjectTaskManager() {
             <div>No tasks found for this user in this project.</div>
           ) : (
             <>
-              <div style={{ marginBottom: '10px'}}>
+              <div style={{ marginBottom: '10px' }}>
                 Total tasks: {userTasks.length}
               </div>
               
@@ -329,7 +354,7 @@ function ProjectTaskManager() {
                       <input
                         type="checkbox"
                         checked={task.complete}
-                        onChange={() => toggleTask(task.task_id, task.complete)}
+                        onChange={() => handleToggleComplete(task.task_id, task.complete)}
                       />
                       <span style={{ 
                         textDecoration: task.complete ? 'line-through' : 'none',
@@ -356,6 +381,8 @@ function ProjectTaskManager() {
           )}
         </div>
       )}
+
+      {/* ─── THEME SELECTOR ───────────────────────────────────────────────── */}
       <button onClick={() => setShowThemeMenu(!showThemeMenu)}>Themes</button>
       <div className={`toggle ${showThemeMenu ? "theme-visible" : "theme-hidden"}`}>
         <button onClick={() => setTheme("dark")}>Dark</button>
@@ -367,97 +394,8 @@ function ProjectTaskManager() {
         <button onClick={() => setTheme("sand")}>Sand</button>
         <button onClick={() => setTheme("midnight")}>Midnight</button>
       </div>
-      {/* Notification html Addition */}
-      {lateSprintWarnings.length > 0 && (
-        <div className="late-warning-box">
-          <h4>⚠ Past Sprint Tasks</h4>
-          <ul>
-            {lateSprintWarnings.map(t => (
-              <li key={t.task_id}>
-                <strong>{t.points} pts</strong> — {t.description} (Sprint {t.sprint_num})
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   )
 }
 
 export default ProjectTaskManager
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// HOW THE DATA FLOWS
-// ═══════════════════════════════════════════════════════════════════════════════
-
-/*
-
-1. Component loads
-   └─> loadProjects() runs
-       └─> projects state fills with all projects
-
-2. User selects a project
-   └─> selectedProjectId updates
-       └─> useEffect detects change
-           └─> loadUsersInProject() runs
-               └─> usersInProject state fills with users in that project
-
-3. User selects a user
-   └─> selectedUserId updates
-       └─> useEffect detects change
-           └─> loadUserTasks() runs
-               └─> userTasks state fills with tasks for that user in that project
-
-*/
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// SIMPLIFIED VERSION - JUST THE QUERIES
-// ═══════════════════════════════════════════════════════════════════════════════
-
-async function getProjects() {
-  const { data, error } = await supabase
-    .from('Projects')
-    .select('*')
-    .order('project_name')
-  
-  return data
-}
-
-async function getUsersInProject(projectId) {
-  // Get user IDs from junction table
-  const { data: projectUsers } = await supabase
-    .from('Project_users')
-    .select('*')
-    .eq('project_id', projectId)
-  
-  const userIds = projectUsers.map(pu => pu.user_id)
-  
-  // Get full user details
-  const { data: users } = await supabase
-    .from('Users')
-    .select('*')
-    .in('user_id', userIds)
-    .order('alias')
-  
-  return users
-}
-
-async function getUserTasks(userId, projectId) {
-  // Get task IDs for user
-  const { data: userTasks } = await supabase
-    .from('User_tasks')
-    .select('*')
-    .eq('user_id', userId)
-  
-  const taskIds = userTasks.map(ut => ut.task_id)
-  
-  // Get task details filtered by project
-  const { data: tasks } = await supabase
-    .from('Tasks')
-    .select('*')
-    .in('task_id', taskIds)
-    .eq('project_id', projectId)
-    .order('created_at')
-  
-  return tasks
-}
