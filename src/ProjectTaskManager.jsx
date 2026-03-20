@@ -61,11 +61,31 @@ function ProjectTaskManager() {
     }
   }, [showLateWarnings]);
 
+  // Save locally?
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const savedProject = localStorage.getItem("selectedProjectId");
+    const savedUser = localStorage.getItem("selectedUserId");
+
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+
+    if (savedProject) {
+      setSelectedProjectId(Number(savedProject));
+    }
+
+    if (savedUser) {
+      setSelectedUserId(Number(savedUser));
+    }
+  }, []);
+
   // ═══════════════════════════════════════════════════════════════════════════════
   // HELPER FUNCTIONS
   // ═══════════════════════════════════════════════════════════════════════════════
 
   function setTheme(themeName) {
+    localStorage.setItem("theme", themeName);
     const root = document.documentElement
     const theme = themes[themeName]
 
@@ -150,6 +170,9 @@ function ProjectTaskManager() {
       setUsersInProject([])
       setSelectedUserId(null)
     }
+    if (selectedProjectId !== null) {
+      localStorage.setItem("selectedProjectId", selectedProjectId);
+    }
   }, [selectedProjectId])
 
   async function loadUsersInProject(projectId) {
@@ -205,7 +228,27 @@ function ProjectTaskManager() {
       setUserTasks([])
       setLateSprintWarnings([])
     }
+    if (selectedUserId !== null) {
+      localStorage.setItem("selectedUserId", selectedUserId);
+    }
   }, [selectedUserId, selectedProjectId])
+
+  // More Local Saving
+  useEffect(() => {
+    const savedUser = localStorage.getItem("selectedUserId");
+
+    if (savedUser && usersInProject.length > 0) {
+      const userId = Number(savedUser);
+
+      // Only restore if that user actually belongs to this project
+      const exists = usersInProject.some(u => u.user_id === userId);
+
+      if (exists) {
+        setSelectedUserId(userId);
+      }
+    }
+  }, [usersInProject]);
+  
 
   async function loadUserTasks(userId, projectId) {
     setLoadingTasks(true)
