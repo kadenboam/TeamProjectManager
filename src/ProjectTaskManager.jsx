@@ -318,7 +318,6 @@ function ProjectTaskManager() {
           src="rick_roll.mp4"
           autoPlay
           style={{
-            width: "100%",
             height: "100%",
             objectFit: "cover",
           }}
