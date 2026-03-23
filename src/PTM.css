@@ -9,6 +9,7 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 img {
@@ -58,16 +59,10 @@ body {
   text-align: center;
 }
 
-/* Page title 
+/* Page title */ 
 h1 {
-  display: inline;
-  text-align: center;
-  background: var(--box-color);
-  padding: 20px;
-  border-radius: 8px;
-  min-width: 150px;
-  border: 1px solid #ddd;
-}*/
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
 h2 {
   margin: 0;
