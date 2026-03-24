@@ -1,0 +1,188 @@
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* DONUT VIEW STYLES */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.donut-view-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ─── HEADER ─────────────────────────────────────────────────────────────── */
+
+.donut-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.back-link {
+  color: var(--accent-color, #007bff);
+  text-decoration: none;
+  font-size: 16px;
+  transition: opacity 0.2s;
+}
+
+.back-link:hover {
+  opacity: 0.7;
+}
+
+.donut-header h1 {
+  margin: 0;
+  font-size: 32px;
+  color: var(--text-color, #333);
+}
+
+/* ─── PROJECT SELECTOR ───────────────────────────────────────────────────── */
+
+.project-selector {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: var(--box-color, #f8f9fa);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #ddd);
+}
+
+.project-selector label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+}
+
+.project-selector select {
+  padding: 10px 15px;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: var(--input-bg, white);
+  color: var(--text-color, black);
+  cursor: pointer;
+  min-width: 250px;
+}
+
+.project-selector select:focus {
+  outline: none;
+  border-color: var(--accent-color, #007bff);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* ─── MESSAGE BOX ────────────────────────────────────────────────────────── */
+
+.message-box {
+  padding: 40px;
+  text-align: center;
+  background-color: var(--box-color, #f8f9fa);
+  border-radius: 8px;
+  border: 2px dashed var(--border-color, #ddd);
+  margin-top: 20px;
+}
+
+.message-box p {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text-color, #666);
+}
+
+.message-box.error {
+  background-color: #fee;
+  border-color: #fcc;
+}
+
+.message-box.error p {
+  color: #c00;
+}
+
+/* ─── CHART CONTAINER ────────────────────────────────────────────────────── */
+
+.chart-container {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 1;
+}
+
+/* ─── CENTER TEXT (TOTAL PERCENTAGE) ──────────────────────────────────────── */
+
+.center-text {
+  position: absolute;
+  top: 50%;
+  left: 32%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.center-percentage {
+  font-size: 48px;
+  font-weight: bold;
+  color: var(--text-color, #333);
+  line-height: 1;
+}
+
+.center-label {
+  font-size: 16px;
+  color: var(--text-color, #666);
+  margin-top: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .donut-view-container {
+    padding: 15px;
+  }
+
+  .donut-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .donut-header h1 {
+    font-size: 24px;
+  }
+
+  .project-selector label {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .project-selector select {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .chart-wrapper {
+    max-width: 100%;
+  }
+
+  .center-percentage {
+    font-size: 36px;
+  }
+
+  .center-label {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .center-percentage {
+    font-size: 28px;
+  }
+
+  .center-label {
+    font-size: 12px;
+  }
+}
