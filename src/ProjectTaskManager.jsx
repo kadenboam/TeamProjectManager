@@ -20,6 +20,7 @@ import {
   assignUserToProject, 
   removeUserFromProject 
 } from './supabaseHelpers'
+import AddItemModal from './Additemmodal'
 
 function ProjectTaskManager() {
   // ─── STATE FOR THE THREE DATASETS ─────────────────────────────────────────────
@@ -328,6 +329,26 @@ function ProjectTaskManager() {
     setLoadingTasks(false)
   }
 
+const [showModal, setShowModal] = useState(false)
+const [modalTab, setModalTab] = useState('task') 
+
+function handleModalSuccess(type) {
+  // Called after successfully adding an item
+  
+  if (type === 'task') {
+    // Reload tasks
+    loadUserTasks(selectedUserId, selectedProjectId)
+  } else if (type === 'user') {
+    // Reload users in project
+    if (selectedProjectId) {
+      loadUsersInProject(selectedProjectId)
+    }
+  } else if (type === 'project') {
+    // Reload projects
+    loadProjects()
+  }
+}
+
   // ═══════════════════════════════════════════════════════════════════════════════
   // RENDER
   // ═══════════════════════════════════════════════════════════════════════════════
@@ -362,6 +383,9 @@ function ProjectTaskManager() {
 
   return (
     <div style={{ padding: '20px' }}>
+      <Link to="/projects">Old Things</Link>
+      <Link to="/donut-view">📊 Donut View</Link>
+
       <h1>Project Task Manager</h1>
 
       {/* ─── PROJECT SELECTOR ─────────────────────────────────────────────── */}
@@ -527,8 +551,41 @@ function ProjectTaskManager() {
               </button>
             ))}
         </div>
+      </div>
+      <button onClick={() => {
+        setModalTab('project')
+        setShowModal(true)
+      }}>
+        + Add Project
+      </button>
+      
+      {/* Button to add a user (only show if project is selected) */}
+      {selectedProjectId && (
+        <button onClick={() => {
+          setModalTab('user')
+          setShowModal(true)
+        }}>
+          + Add User
+        </button>
       )}
-      <Link to="/projects">Old Things</Link>
+      
+      {/* Button to add a task (only show if both project and user are selected) */}
+      {selectedProjectId && selectedUserId && (
+        <button onClick={() => {
+          setModalTab('task')
+          setShowModal(true)
+        }}>
+          + Add Task
+        </button>
+      )}
+       <AddItemModal 
+      isOpen={showModal}
+      onClose={() => setShowModal(false)}
+      activeTab={modalTab}
+      projectId={selectedProjectId}
+      userId={selectedUserId}
+      onSuccess={handleModalSuccess}
+    />
     </div>
   )
 }
