@@ -129,6 +129,29 @@ function ProjectTaskManager() {
     const usage = JSON.parse(localStorage.getItem("themeUsage") || "{}");
     usage[themeName] = (usage[themeName] || 0) + 1;
     localStorage.setItem("themeUsage", JSON.stringify(usage));
+
+    // Load Google Font dynamically
+    if (theme["--font-family"]) {
+      const fontName = theme["--font-family"]
+        .replace(/['"]/g, "")        // remove quotes
+        .split(",")[0]               // take first font
+        .trim()
+        .replace(/ /g, "+");         // convert spaces to +
+
+      const linkId = "dynamic-theme-font";
+
+      // Remove old font link if exists
+      const oldLink = document.getElementById(linkId);
+      if (oldLink) oldLink.remove();
+
+      // Create new link
+      const link = document.createElement("link");
+      link.id = linkId;
+      link.rel = "stylesheet";
+      link.href = `https://fonts.googleapis.com/css2?family=${fontName}:wght@300;400;600&display=swap`;
+
+      document.head.appendChild(link);
+    }
   }
 
   async function handleToggleComplete(taskId, currentStatus) {
