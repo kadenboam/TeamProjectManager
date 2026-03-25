@@ -532,6 +532,7 @@ function handleModalSuccess(type) {
         <button onClick={() => setShowThemeMenu(!showThemeMenu)}>Themes</button>
         <button onClick={() => setShowRickRoll(true)}>😋</button>
       </div>
+      
       {showThemeMenu && (
         <div className="theme-buttons">
           {firstFive.map(name => (
@@ -551,7 +552,8 @@ function handleModalSuccess(type) {
               </button>
             ))}
         </div>
-      </div>
+      )}
+      
       <button onClick={() => {
         setModalTab('project')
         setShowModal(true)
